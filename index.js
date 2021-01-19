@@ -27,13 +27,66 @@ app.post('/users', async (req, res) => {
 // get all users
 app.get('/users', async (req, res) => {
     try {
-        const getAllUsers = await pool.query("SELECT * FROM course;")
+        const getAllUsers = await pool.query("SELECT * FROM users;")
         res.json(getAllUsers.rows);
     } catch (error) {
         console.log(error);
     }
 });
 
+// get all users
+app.get('/getteachersfromcourse/:id/:type', async (req, res) => {
+    try {
+        const {id,type} = req.params;
+        const getTeachers = await pool.query(`SELECT
+        course.title, 
+        "Person"."fName", 
+        "Person"."type"
+    FROM
+        course
+        INNER JOIN
+        "CourseParticipants"
+        ON 
+            course."id" = "CourseParticipants"."courseId"
+        INNER JOIN
+        "Person"
+        ON 
+            "CourseParticipants"."personId" = "Person"."id"
+    WHERE
+        "Person"."type" = $2 AND
+        course."id" = $1`,[id,type])
+        res.json(getTeachers.rows);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+app.post('/getteachersfromcourse/:id', async (req, res) => {
+    try {
+        const {id} = req.params;
+        const {type} = req.body;
+        const getTeachers = await pool.query(`SELECT
+        course.title, 
+        "Person"."fName", 
+        "Person"."type"
+    FROM
+        course
+        INNER JOIN
+        "CourseParticipants"
+        ON 
+            course."id" = "CourseParticipants"."courseId"
+        INNER JOIN
+        "Person"
+        ON 
+            "CourseParticipants"."personId" = "Person"."id"
+    WHERE
+        "Person"."type" = $2 AND
+        course."id" = $1`,[id,type])
+        res.json(getTeachers.rows);
+    } catch (error) {
+        console.log(error);
+    }
+});
 
 // get user by id
 app.get('/users/:id', async (req, res) => {
