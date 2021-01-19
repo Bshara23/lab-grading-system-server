@@ -12,7 +12,7 @@
  Target Server Version : 130001
  File Encoding         : 65001
 
- Date: 19/01/2021 13:36:35
+ Date: 20/01/2021 00:00:16
 */
 
 
@@ -122,6 +122,9 @@ CREATE TABLE "Homework" (
 -- Records of Homework
 -- ----------------------------
 BEGIN;
+INSERT INTO "Homework" VALUES (456, 4, 'HomeWork2', 'This is homework2 of Web', '30/10/2020', '20/10/2020', '20/10/2020');
+INSERT INTO "Homework" VALUES (123, 4, 'HomeWork1', 'This is homework1 of Web', '21/10/2020', '10/10/2020', '10/10/2020');
+INSERT INTO "Homework" VALUES (789, 4, 'HomeWork3', 'This is homework3 of Web', '20/11/2020', '10/11/2020', '10/11/2020');
 COMMIT;
 
 -- ----------------------------
@@ -188,6 +191,9 @@ CREATE TABLE "Submission" (
 -- Records of Submission
 -- ----------------------------
 BEGIN;
+INSERT INTO "Submission" VALUES (1, 111111111, 123, 90, 'Submitted', '/10/0', '10/10', 1, 'hh');
+INSERT INTO "Submission" VALUES (2, 111111111, 456, 0, 'Not Submitted', '10', '10', 2, 'll');
+INSERT INTO "Submission" VALUES (3, 111111111, 789, 0, 'Not Submitted', '0', '0', 3, 'k');
 COMMIT;
 
 -- ----------------------------
@@ -258,28 +264,28 @@ COMMIT;
 -- ----------------------------
 ALTER SEQUENCE "CourseParticipants_id_seq"
 OWNED BY "CourseParticipants"."id";
-SELECT setval('"CourseParticipants_id_seq"', 2, false);
+SELECT setval('"CourseParticipants_id_seq"', 3, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "File_id_seq"
 OWNED BY "HomeworkFile"."id";
-SELECT setval('"File_id_seq"', 2, false);
+SELECT setval('"File_id_seq"', 3, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "Homework_id_seq"
 OWNED BY "Homework"."id";
-SELECT setval('"Homework_id_seq"', 2, false);
+SELECT setval('"Homework_id_seq"', 3, false);
 
 -- ----------------------------
 -- Alter sequences owned by
 -- ----------------------------
 ALTER SEQUENCE "users_user_id_seq"
 OWNED BY "users"."user_id";
-SELECT setval('"users_user_id_seq"', 4, true);
+SELECT setval('"users_user_id_seq"', 5, true);
 
 -- ----------------------------
 -- Primary Key structure for table Comment
@@ -331,3 +337,14 @@ ALTER TABLE "users" ADD CONSTRAINT "users_pkey" PRIMARY KEY ("user_id");
 -- ----------------------------
 ALTER TABLE "CourseParticipants" ADD CONSTRAINT "CourseId" FOREIGN KEY ("courseId") REFERENCES "course" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
 ALTER TABLE "CourseParticipants" ADD CONSTRAINT "PersonId" FOREIGN KEY ("personId") REFERENCES "Person" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
+-- Foreign Keys structure for table Homework
+-- ----------------------------
+ALTER TABLE "Homework" ADD CONSTRAINT "CourseId" FOREIGN KEY ("courseId") REFERENCES "course" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- ----------------------------
+-- Foreign Keys structure for table Submission
+-- ----------------------------
+ALTER TABLE "Submission" ADD CONSTRAINT "HomeWorkId" FOREIGN KEY ("homeworkId") REFERENCES "Homework" ("id") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Submission" ADD CONSTRAINT "PersonId" FOREIGN KEY ("studentId") REFERENCES "Person" ("id") ON DELETE CASCADE ON UPDATE CASCADE;

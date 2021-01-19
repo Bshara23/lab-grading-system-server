@@ -8,61 +8,8 @@ const ayman = require('./queries/ayman');
 // middleware
 app.use(cors());
 app.use(express.json());
-//get the specific homework of student
-app.get('/getStudentHomeWork/:SubmittedId',async(req,res)=>{
-    try {
-        const {SubmittedId} = req.params;
-        const getStudentHomeWork = await pool.query(`SELECT
-        *
-    FROM
-        "Submission"
-    WHERE
-        "Submission"."id" =  $1`,[SubmittedId])
-    res.json(getStudentHomeWork.rows);
-    } catch (error) {
-        console.log(error);
-    }
-})
-//get course homeworks
-app.get('/getCourseHomeWorks/:courseId',async(req,res)=>{
-    try {
-        const {courseId} = req.params;
-        const getCourseHomeWorks = await pool.query(`SELECT
-	"Homework".title, 
-	"Homework".deadline, 
-	"Homework".description
-FROM
-	"Homework"
-WHERE
-	"Homework"."courseId" = $1`,[courseId])
-    res.json(getCourseHomeWorks.rows);
-    } catch (error) {
-        console.log(error);
-    }
-})
-//get the Home that the student submitted and not sumbitted
-app.get('/getStudentCourseHomeWorks/:studentId/:courseId',async(req,res)=>{
-    try {
-        const {studentId,courseId} = req.params;
-        const getStudentHomeWorks = await pool.query(`SELECT
-        "Homework".title, 
-        "Homework".deadline, 
-        "Submission".status, 
-        "Submission"."id"
-    FROM
-        "Homework"
-        INNER JOIN
-        "Submission"
-        ON 
-            "Homework"."id" = "Submission"."homeworkId"
-    WHERE
-        "Submission"."studentId" = $1 AND
-        "Homework"."courseId" = $2`,[studentId,courseId])
-        res.json(getStudentHomeWorks.rows);
-    } catch (error) {
-        console.log(error);
-    }
-})
+
+
 // get all courses of user
 app.get('/getUserCourses/:id', async (req, res) => {
     try {
@@ -90,20 +37,6 @@ app.get('/getUserCourses/:id', async (req, res) => {
     }
 });
 
-// create a user
-app.post('/users', async (req, res) => {
-    try {
-        console.log(req.body);
-        const {user_id, user_name} = req.body; 
-        const addUser = await pool.query("INSERT INTO users (user_id, user_name) VALUES($1, $2) RETURNING *",
-        [user_id, user_name])
-        //user_id | user_name
-        res.json(addUser.rows[0]);
-    } catch (error) {
-        console.log(error);
-    }
-});
-
 // get all users
 app.get('/users', async (req, res) => {
     try {
@@ -121,9 +54,7 @@ app.get('/getteachersfromcourse/:id/:type', async (req, res) => {
         const getTeachers = await pool.query(`SELECT
         course.title, 
         "Person"."fName", 
-        "Person"."lName", 
-        "Person"."type", 
-        course."id"
+        "Person"."type"
     FROM
         course
         INNER JOIN
@@ -135,14 +66,13 @@ app.get('/getteachersfromcourse/:id/:type', async (req, res) => {
         ON 
             "CourseParticipants"."personId" = "Person"."id"
     WHERE
-        "Person"."type" =$2 AND
-        course."id" =$1`,[id,type])
+        "Person"."type" = $2 AND
+        course."id" = $1`,[id,type])
         res.json(getTeachers.rows);
     } catch (error) {
         console.log(error);
     }
 });
-
 app.post('/getteachersfromcourse/:id', async (req, res) => {
     try {
         const {id} = req.params;
@@ -222,3 +152,29 @@ app.get('/courses', async (req, res) => {
 app.listen(5000, () => {
   console.log("Server has started on port 5000");
 });
+
+
+
+function sssss(type){
+    return `SELECT
+    "Course".title, 
+    "Person"."fName", 
+    "Person"."lName", 
+    "Person"."type", 
+    "Course".points, 
+    "Course"."id", 
+    "CourseParticipants"."courseId"
+    FROM
+    "Person"
+    INNER JOIN
+    "CourseParticipants"
+    ON 
+        "Person"."id" = "CourseParticipants"."personId"
+    INNER JOIN
+    "Course"
+    ON 
+        "CourseParticipants"."courseId" = "Course"."id"
+    WHERE
+    "Course"."id" = 4 AND "Person"."type" = '${type}'`
+
+} 
