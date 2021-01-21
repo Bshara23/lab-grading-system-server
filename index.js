@@ -23,6 +23,7 @@ app.use(express.json());
 app.put('/Grade/:SubmissionId/:Grade', async (req, res) => {
     try {
         const {SubmissionId,Grade} = req.params;
+        console.log("body:",req.body);
         const updateUser = await pool.query("UPDATE Submission SET grade = $1 WHERE id = $2;", [Grade, SubmissionId])
         res.json("Grade Updated");
     } catch (error) {
