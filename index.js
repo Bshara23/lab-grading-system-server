@@ -21,6 +21,109 @@ var upload = multer({ storage: storage });
 // middleware
 app.use(cors());
 app.use(express.json());
+// middleware
+// Save Comments
+// app.post('/SaveComment/:MyComment', async (req, res) => {
+//     try {
+//         const {MyComment} = req.params;
+//         const SaveComment = await pool.query("INSERT INTO Comment (user_id, user_name) VALUES($1, $2) RETURNING *",
+//         [user_id, user_name])
+//         //user_id | user_name
+//         res.json(addUser.rows[0]);
+//     } catch (error) {
+//         console.log(error);
+//     }
+// });
+
+// update user
+app.put("/Grade/:SubmissionId/:Grade", async (req, res) => {
+  try {
+    const { SubmissionId, Grade } = req.params;
+    const updateUser = await pool.query(
+      "UPDATE Submission SET grade = $1 WHERE id = $2;",
+      [Grade, SubmissionId]
+    );
+    res.json("Grade Updated");
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get Student Comments
+app.get("/getTeachSubComments/:SubmissionId", async (req, res) => {
+  try {
+    const { SubmissionId } = req.params;
+    const getTeachSubComments = await pool.query(
+      `SELECT
+        *
+    FROM
+        "Comment"
+    WHERE
+        "Comment"."submissionId" = $1 AND
+        "Comment"."authorType" = 'teacher'`,
+      [SubmissionId]
+    );
+    res.json(getTeachSubComments.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+//get Student Comments
+app.get("/getStuSubComments/:StudentId/:SubmissionId", async (req, res) => {
+  try {
+    const { StudentId, SubmissionId } = req.params;
+    const getStudentComments = await pool.query(
+      `SELECT
+        "Comment".*
+    FROM
+        "Comment"
+    WHERE
+        "Comment"."authorId" = $1 AND
+        "Comment"."submissionId" = $2`,
+      [StudentId, SubmissionId]
+    );
+    res.json(getStudentComments.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+//get student details
+app.get("/getStudentDetails/:StudentId", async (req, res) => {
+  try {
+    const { StudentId } = req.params;
+    const getStudentDetails = await pool.query(
+      `SELECT
+        *
+    FROM
+        "Person"
+    WHERE
+        "Person"."id"  =$1`,
+      [StudentId]
+    );
+    res.json(getStudentDetails.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+//get the specific homework of student
+app.get("/getAllStudentHomeWorks/:HomeWorkId", async (req, res) => {
+  try {
+    const { HomeWorkId } = req.params;
+    const getStudentsHomeWorks = await pool.query(
+      `SELECT
+        "Submission".*
+    FROM
+        "Submission"
+    WHERE
+        "Submission"."homeworkId" =$1`,
+      [HomeWorkId]
+    );
+    res.json(getStudentsHomeWorks.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 //get the specific homework of student
 app.get("/getStudentHomeWork/:SubmittedId", async (req, res) => {
   try {
@@ -40,11 +143,13 @@ app.get("/getStudentHomeWork/:SubmittedId", async (req, res) => {
   }
 });
 //get course homeworks
+
 app.get("/getCourseHomeWorks/:courseId", async (req, res) => {
   try {
     const { courseId } = req.params;
     const getCourseHomeWorks = await pool.query(
       `SELECT
+    "Homework".id, 
 	"Homework".title, 
 	"Homework".deadline, 
 	"Homework".description
@@ -60,15 +165,16 @@ WHERE
   }
 });
 //get the Home that the student submitted and not sumbitted
+
 app.get("/getStudentCourseHomeWorks/:studentId/:courseId", async (req, res) => {
   try {
     const { studentId, courseId } = req.params;
     const getStudentHomeWorks = await pool.query(
       `SELECT
+        "Submission".*, 
         "Homework".title, 
         "Homework".deadline, 
-        "Submission".status, 
-        "Submission"."id"
+        "Homework".description
     FROM
         "Homework"
         INNER JOIN
