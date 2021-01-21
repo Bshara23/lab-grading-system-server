@@ -4,6 +4,7 @@ const cors = require("cors");
 const pool = require("./db");
 const path = require("path");
 const { v4: uuidv4 } = require('uuid');
+
 var multer = require("multer");
 
 var storage = multer.diskStorage({
@@ -34,7 +35,20 @@ app.use(express.json());
 //         console.log(error);
 //     }
 // });
-
+// Add new Comment
+app.post("/AddComment", async (req, res) => {
+    try {
+       const{authorid,authorfullname,authortype,Submissionid,createdat, updatedat,content} =req.body;
+      const addComment = await pool.query(
+        "INSERT INTO comment (authorid,authorfullname,authortype,Submissionid,createdat, updatedat,content,id) VALUES($1, $2,$3,$4,$5,$6,$7,$8) RETURNING *",
+        [authorid,authorfullname,authortype,Submissionid,"2021-04-20T21:26:55.065Z", updatedat,content,uuidv4()]
+      );
+      res.json(addComment);
+    } catch (error) {
+      console.log(error);
+    }
+  });
+  
 // update user
 app.put("/Grade/:SubmissionId/:Grade", async (req, res) => {
   try {
