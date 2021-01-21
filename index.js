@@ -3,7 +3,7 @@ const app = express();
 const cors = require("cors");
 const pool = require("./db");
 const path = require("path");
-
+const { v4: uuidv4 } = require('uuid');
 var multer = require("multer");
 
 var storage = multer.diskStorage({
@@ -38,13 +38,14 @@ app.use(express.json());
 // update user
 app.put("/Grade/:SubmissionId/:Grade", async (req, res) => {
   try {
-    const { SubmissionId, Grade } = req.params;
-    console.log("body:", req.body);
-    const updateUser = await pool.query(
-      "UPDATE Submission SET grade = $1 WHERE id = $2;",
-      [Grade, SubmissionId]
-    );
-    res.json("Grade Updated");
+    const{SubmissionId,grade,id,submitteddate,Status,graderId,graderFullName,homeworkId}=req.body;
+    console.log("grade and graderId",grade,graderId);
+      const updateUser = await pool.query(
+        // "UPDATE Submission SET grade = $1,updatedAt=$2,status=$3,graderId=$4,graderFullName=$5 WHERE id = $6;",
+        // [grade, submitteddate,Status,graderId,graderFullName,SubmissionId]
+         "UPDATE Submission SET grade = '50' WHERE id = '1';",
+      );
+    res.json(grade);
   } catch (error) {
     console.log(error);
   }
@@ -375,8 +376,8 @@ app.post(
       const { homeworkId } = req.params;
       const { path, mimetype, originalname } = req.file;
       const addFile = await pool.query(
-        "INSERT INTO homework_file (path, homework_id, mimetype, created_at, updated_at, title) VALUES($1, $2, $3, $4, $5, $6) RETURNING *",
-        [path, homeworkId, mimetype, currDate, currDate, originalname]
+        "INSERT INTO homework_file (path, homework_id, mimetype, created_at, updated_at, title, id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+        [path, homeworkId, mimetype, currDate, currDate, originalname, uuidv4()]
       );
       res.json(addFile.rows[0]);
     } catch (error) {
