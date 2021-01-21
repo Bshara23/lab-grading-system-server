@@ -41,9 +41,8 @@ app.put("/Grade/:SubmissionId/:Grade", async (req, res) => {
     const{SubmissionId,grade,id,submitteddate,Status,graderId,graderFullName,homeworkId}=req.body;
     console.log("grade and graderId",grade,graderId);
       const updateUser = await pool.query(
-        // "UPDATE Submission SET grade = $1,updatedAt=$2,status=$3,graderId=$4,graderFullName=$5 WHERE id = $6;",
-        // [grade, submitteddate,Status,graderId,graderFullName,SubmissionId]
-         "UPDATE Submission SET grade = '50' WHERE id = '1';",
+         "UPDATE submission SET grade = $1,status=$2,graderid=$3,graderfullname=$4 WHERE id = $5;",
+         [grade, Status,graderId,graderFullName,SubmissionId]
       );
     res.json(grade);
   } catch (error) {
@@ -59,10 +58,10 @@ app.get("/getTeachSubComments/:SubmissionId", async (req, res) => {
       `SELECT
         *
     FROM
-        "Comment"
+        "comment"
     WHERE
-        "Comment"."submissionId" = $1 AND
-        "Comment"."authorType" = 'teacher'`,
+        "comment"."submissionid" = $1 AND
+        "comment"."authortype" = 'teacher'`,
       [SubmissionId]
     );
     res.json(getTeachSubComments.rows);
@@ -76,12 +75,12 @@ app.get("/getStuSubComments/:StudentId/:SubmissionId", async (req, res) => {
     const { StudentId, SubmissionId } = req.params;
     const getStudentComments = await pool.query(
       `SELECT
-        "Comment".*
+        "comment".*
     FROM
-        "Comment"
+        "comment"
     WHERE
-        "Comment"."authorId" = $1 AND
-        "Comment"."submissionId" = $2`,
+        "comment"."authorid" = $1 AND
+        "comment"."submissionid" = $2`,
       [StudentId, SubmissionId]
     );
     res.json(getStudentComments.rows);
@@ -97,9 +96,9 @@ app.get("/getStudentDetails/:StudentId", async (req, res) => {
       `SELECT
         *
     FROM
-        "Person"
+        "person"
     WHERE
-        "Person"."id"  =$1`,
+        "person"."id"  =$1`,
       [StudentId]
     );
     res.json(getStudentDetails.rows);
@@ -113,11 +112,11 @@ app.get("/getAllStudentHomeWorks/:HomeWorkId", async (req, res) => {
     const { HomeWorkId } = req.params;
     const getStudentsHomeWorks = await pool.query(
       `SELECT
-        "Submission".*
+        "submission".*
     FROM
-        "Submission"
+        "submission"
     WHERE
-        "Submission"."homeworkId" =$1`,
+        "submission"."homeworkid" =$1`,
       [HomeWorkId]
     );
     res.json(getStudentsHomeWorks.rows);
@@ -134,9 +133,9 @@ app.get("/getStudentHomeWork/:SubmittedId", async (req, res) => {
       `SELECT
         *
     FROM
-        "Submission"
+        "submission"
     WHERE
-        "Submission"."id" =  $1`,
+        "submission"."id" =  $1`,
       [SubmittedId]
     );
     res.json(getStudentHomeWork.rows);
@@ -151,14 +150,14 @@ app.get("/getCourseHomeWorks/:courseId", async (req, res) => {
     const { courseId } = req.params;
     const getCourseHomeWorks = await pool.query(
       `SELECT
-    "Homework".id, 
-	"Homework".title, 
-	"Homework".deadline, 
-	"Homework".description
+    "homework".id, 
+	"homework".title, 
+	"homework".deadline, 
+	"homework".description
 FROM
-	"Homework"
+	"homework"
 WHERE
-	"Homework"."courseId" = $1`,
+	"homework"."courseid" = $1`,
       [courseId]
     );
     res.json(getCourseHomeWorks.rows);
@@ -173,19 +172,19 @@ app.get("/getStudentCourseHomeWorks/:studentId/:courseId", async (req, res) => {
     const { studentId, courseId } = req.params;
     const getStudentHomeWorks = await pool.query(
       `SELECT
-        "Submission".*, 
-        "Homework".title, 
-        "Homework".deadline, 
-        "Homework".description
+        "submission".*, 
+        "homework".title, 
+        "homework".deadline, 
+        "homework".description
     FROM
-        "Homework"
+        "homework"
         INNER JOIN
-        "Submission"
+        "submission"
         ON 
-            "Homework"."id" = "Submission"."homeworkId"
+            "homework"."id" = "submission"."homeworkid"
     WHERE
-        "Submission"."studentId" = $1 AND
-        "Homework"."courseId" = $2`,
+        "submission"."studentid" = $1 AND
+        "homework"."courseid" = $2`,
       [studentId, courseId]
     );
     res.json(getStudentHomeWorks.rows);
@@ -200,21 +199,21 @@ app.get("/getUserCourses/:id", async (req, res) => {
     const getUserCourses = await pool.query(
       `SELECT
         course.title, 
-        "Person"."fName", 
-        "Person"."lName", 
+        "person"."fname", 
+        "person"."lname", 
         course."id"
     FROM
-        "Person"
+        "person"
         INNER JOIN
-        "CourseParticipants"
+        "courseparticipants"
         ON 
-            "Person"."id" = "CourseParticipants"."personId"
+            "person"."id" = "courseparticipants"."personid"
         INNER JOIN
         course
         ON 
-            "CourseParticipants"."courseId" = course."id"
+            "courseparticipants"."courseid" = course."id"
     WHERE
-        "Person"."id" =$1`,
+        "person"."id" =$1`,
       [id]
     );
     res.json(getUserCourses.rows);
@@ -256,22 +255,22 @@ app.get("/getteachersfromcourse/:id/:type", async (req, res) => {
     const getTeachers = await pool.query(
       `SELECT
         course.title, 
-        "Person"."fName", 
-        "Person"."lName", 
-        "Person"."type", 
+        "person"."fname", 
+        "person"."lname", 
+        "person"."type", 
         course."id"
     FROM
         course
         INNER JOIN
-        "CourseParticipants"
+        "courseparticipants"
         ON 
-            course."id" = "CourseParticipants"."courseId"
+            course."id" = "courseparticipants"."courseid"
         INNER JOIN
-        "Person"
+        "person"
         ON 
-            "CourseParticipants"."personId" = "Person"."id"
+            "courseparticipants"."personid" = "person"."id"
     WHERE
-        "Person"."type" =$2 AND
+        "person"."type" =$2 AND
         course."id" =$1`,
       [id, type]
     );
@@ -288,20 +287,20 @@ app.post("/getteachersfromcourse/:id", async (req, res) => {
     const getTeachers = await pool.query(
       `SELECT
         course.title, 
-        "Person"."fName", 
-        "Person"."type"
+        "person"."fname", 
+        "person"."type"
     FROM
         course
         INNER JOIN
-        "CourseParticipants"
+        "courseparticipants"
         ON 
-            course."id" = "CourseParticipants"."courseId"
+            course."id" = "courseparticipants"."courseid"
         INNER JOIN
-        "Person"
+        "person"
         ON 
-            "CourseParticipants"."personId" = "Person"."id"
+            "courseparticipants"."personid" = "person"."id"
     WHERE
-        "Person"."type" = $2 AND
+        "person"."type" = $2 AND
         course."id" = $1`,
       [id, type]
     );
