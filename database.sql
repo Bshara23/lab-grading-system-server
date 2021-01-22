@@ -9,45 +9,12 @@
  Source Schema         : public
 
  Target Server Type    : PostgreSQL
- Target Server Version : 130001
+ Target Server Version : 100000
  File Encoding         : 65001
 
- Date: 22/01/2021 13:41:05
+ Date: 22/01/2021 13:52:13
 */
 
-
--- ----------------------------
--- Sequence structure for CourseParticipants_id_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "CourseParticipants_id_seq";
-CREATE SEQUENCE "CourseParticipants_id_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 2147483647
-START 1
-CACHE 1;
-
--- ----------------------------
--- Sequence structure for Homework_id_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "Homework_id_seq";
-CREATE SEQUENCE "Homework_id_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 2147483647
-START 1
-CACHE 1;
-
--- ----------------------------
--- Sequence structure for users_user_id_seq
--- ----------------------------
-DROP SEQUENCE IF EXISTS "users_user_id_seq";
-CREATE SEQUENCE "users_user_id_seq" 
-INCREMENT 1
-MINVALUE  1
-MAXVALUE 2147483647
-START 1
-CACHE 1;
 
 -- ----------------------------
 -- Table structure for comment
@@ -272,27 +239,6 @@ INSERT INTO "users" VALUES (7, 'bshara3');
 INSERT INTO "users" VALUES (44, '44bshara3');
 INSERT INTO "users" VALUES (2, 'aiman');
 COMMIT;
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
-ALTER SEQUENCE "CourseParticipants_id_seq"
-OWNED BY "courseparticipants"."id";
-SELECT setval('"CourseParticipants_id_seq"', 3, false);
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
-ALTER SEQUENCE "Homework_id_seq"
-OWNED BY "homework"."id";
-SELECT setval('"Homework_id_seq"', 3, false);
-
--- ----------------------------
--- Alter sequences owned by
--- ----------------------------
-ALTER SEQUENCE "users_user_id_seq"
-OWNED BY "users"."user_id";
-SELECT setval('"users_user_id_seq"', 5, true);
 
 -- ----------------------------
 -- Primary Key structure for table comment
