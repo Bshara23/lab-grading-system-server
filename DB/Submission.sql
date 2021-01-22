@@ -1,0 +1,6 @@
+INSERT INTO "submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES (2, 111111111, 456, 0, 'Not Submitted', '10', '10', 2, 'll');
+INSERT INTO "submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES (3, 111111111, 789, 0, 'Not Submitted', '0', '0', 3, 'k');
+INSERT INTO "submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES (1, 111111111, 123, 70, 'Submitted', '/10/0', '10/10', 123123123, 'Alex Kesselman');
+INSERT INTO "submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES (2, 111111111, 456, 0, 'Not Submitted', '10', '10', 2, 'll');
+INSERT INTO "submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES (3, 111111111, 789, 0, 'Not Submitted', '0', '0', 3, 'k');
+INSERT INTO "submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES (1, 111111111, 123, 70, 'Submitted', '/10/0', '10/10', 123123123, 'Alex Kesselman');
