@@ -1,23 +1,23 @@
-const express = require("express");
+const express = require('express');
 const app = express();
-const cors = require("cors");
-const pool = require("./db");
-const path = require("path");
-const { v4: uuidv4 } = require('uuid');
+const cors = require('cors');
+const pool = require('./db');
+const path = require('path');
+const {v4: uuidv4} = require('uuid');
 
-var multer = require("multer");
+var multer = require('multer');
 
 var storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, "./uploads");
+    cb(null, './uploads');
   },
   filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e4);
-    cb(null, uniqueSuffix + "_e_e_e_" + file.originalname);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e4);
+    cb(null, uniqueSuffix + '_e_e_e_' + file.originalname);
   },
 });
 
-var upload = multer({ storage: storage });
+var upload = multer({storage: storage});
 
 // middleware
 app.use(cors());
@@ -36,66 +36,201 @@ app.use(express.json());
 //     }
 // });
 // Add new Comment
-app.post("/AddComment", async (req, res) => {
-    try {
-       const{authorid,authorfullname,authortype,Submissionid,createdat, updatedat,content} =req.body;
-      const addComment = await pool.query(
-        "INSERT INTO comment (authorid,authorfullname,authortype,Submissionid,createdat, updatedat,content,id) VALUES($1, $2,$3,$4,$5,$6,$7,$8) RETURNING *",
-        [authorid,authorfullname,authortype,Submissionid,"2021-04-20T21:26:55.065Z", updatedat,content,uuidv4()]
-      );
-      res.json(addComment);
-    } catch (error) {
-      console.log(error);
-    }
-  });
-  
-// update user
-app.put("/Grade/:SubmissionId/:Grade", async (req, res) => {
+
+app.post('/AddComment', async (req, res) => {
   try {
-    const{SubmissionId,grade,id,submitteddate,Status,graderId,graderFullName,homeworkId}=req.body;
-    console.log("grade and graderId",grade,graderId);
-      const updateUser = await pool.query(
-         "UPDATE submission SET grade = $1,status=$2,graderid=$3,graderfullname=$4 WHERE id = $5;",
-         [grade, Status,graderId,graderFullName,SubmissionId]
-      );
+    const {
+      authorid,
+      authorfullname,
+      authortype,
+      submissionid,
+      content,
+    } = req.body;
+    const createdat = new Date().toISOString();
+    const updatedat = createdat;
+    const id = await newIdFor('comment');
+    const addComment = await pool.query(
+      `INSERT INTO "public"."comment" ("id", "authorid", "authorfullname", "authortype", "submissionid", "createdat", "updatedat", "content") VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [
+        id,
+        authorid,
+        authorfullname,
+        authortype,
+        submissionid,
+        createdat,
+        updatedat,
+        content,
+      ]
+    );
+    res.json(addComment);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.post('/AddHomework', async (req, res) => {
+  try {
+    const {cid, title, description, deadline} = req.body;
+    const createdat = new Date().toISOString();
+    const updatedat = createdat;
+    const id = await newIdFor('homework');
+    const addHomework = await pool.query(
+      `INSERT INTO "public"."homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *;`,
+      [id, cid, title, description, deadline, createdat, updatedat]
+    );
+    res.json(id);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.post('/AddCourse', async (req, res) => {
+  try {
+    const {title, description} = req.body;
+    const createdat = new Date().toISOString();
+    const updatedat = createdat;
+    const id = await newIdFor('course');
+    const addCourse = await pool.query(
+      `INSERT INTO "public"."course" ("id", "title", "description", "points", "createdat", "updatedat") VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;`,
+      [id, title, description, 5, createdat, updatedat]
+    );
+    res.json(id);
+  } catch (error) {
+    console.log(error);
+  }
+});
+app.post('/AddCourseParticipant/:courseid/:personid', async (req, res) => {
+  try {
+    const {personid, courseid} = req.params;
+    const createdat = new Date().toISOString();
+    const updatedat = createdat;
+    const id = uuidv4();
+    const addCourseP = await pool.query(
+      `INSERT INTO "public"."courseparticipants" ("id", "personid", "courseid", "createdat", "updatedat") VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [id, personid, courseid, createdat, updatedat]
+    );
+    res.json(addCourseP);
+  } catch (error) {
+    console.log(error);
+  }
+});
+// update submission
+app.put('/submission', async (req, res) => {
+  try {
+    const {studentid, homeworkid, grade, id} = req.body;
+    const updatedSub = await pool.query(
+      `UPDATE "public"."submission" SET "studentid" = $1, "homeworkid" = $2, "grade" = $3 WHERE "id" = $4;`,
+      [studentid, homeworkid, grade, id]
+    );
+    res.json(grade);
+  } catch (error) {
+    console.log(error);
+  }
+});
+// update user
+app.put('/Grade/:SubmissionId/:Grade', async (req, res) => {
+  try {
+    const {
+      SubmissionId,
+      grade,
+      id,
+      submitteddate,
+      Status,
+      graderId,
+      graderFullName,
+      homeworkId,
+    } = req.body;
+    console.log('grade and graderId', grade, graderId);
+    const updateUser = await pool.query(
+      'UPDATE submission SET grade = $1,status=$2,graderid=$3,graderfullname=$4 WHERE id = $5;',
+      [grade, Status, graderId, graderFullName, SubmissionId]
+    );
     res.json(grade);
   } catch (error) {
     console.log(error);
   }
 });
 
-//get Student Comments
-app.get("/getTeachSubComments/:SubmissionId", async (req, res) => {
+app.get('/getAllUsersInCourse/:courseId', async (req, res) => {
+  const {courseId} = req.params;
   try {
-    const { SubmissionId } = req.params;
-    const getTeachSubComments = await pool.query(
+    const getAllUsers = await pool.query(
       `SELECT
-        *
-    FROM
-        "comment"
-    WHERE
-        "comment"."submissionid" = $1 AND
-        "comment"."authortype" = 'teacher'`,
-      [SubmissionId]
+        person."id", 
+        person.fname, 
+        person.lname, 
+        person."type"
+      FROM
+        course
+        INNER JOIN
+        courseparticipants
+        ON 
+          course."id" = courseparticipants.courseid
+        INNER JOIN
+        person
+        ON 
+          person."id" = courseparticipants.personid
+      WHERE
+        course."id" = $1`,
+      [courseId]
     );
-    res.json(getTeachSubComments.rows);
+    res.json(getAllUsers.rows);
   } catch (error) {
     console.log(error);
   }
 });
-//get Student Comments
-app.get("/getStuSubComments/:StudentId/:SubmissionId", async (req, res) => {
+
+app.get('/login/:id/:password', async (req, res) => {
+  const {id, password} = req.params;
   try {
-    const { StudentId, SubmissionId } = req.params;
+    const user = await pool.query(
+      `SELECT
+      *, 
+      person."password"
+    FROM
+      person
+    WHERE
+      person."id" = $1 AND
+      person."password" = $2`,
+      [id, password]
+    );
+    res.json(user.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.get('/getAllUsers', async (req, res) => {
+  try {
+    const getAllUsers = await pool.query(
+      `SELECT
+      person."id", 
+      person.fname, 
+      person.lname, 
+      person."type"
+    FROM
+      person
+    WHERE
+    person."type" != 'admin'`
+    );
+    res.json(getAllUsers.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+//get Student Comments
+app.get('/getComments/:SubmissionId', async (req, res) => {
+  try {
+    const {SubmissionId} = req.params;
     const getStudentComments = await pool.query(
       `SELECT
         "comment".*
     FROM
         "comment"
     WHERE
-        "comment"."authorid" = $1 AND
-        "comment"."submissionid" = $2`,
-      [StudentId, SubmissionId]
+        "comment"."submissionid" = $1`,
+      [SubmissionId]
     );
     res.json(getStudentComments.rows);
   } catch (error) {
@@ -103,9 +238,9 @@ app.get("/getStuSubComments/:StudentId/:SubmissionId", async (req, res) => {
   }
 });
 //get student details
-app.get("/getStudentDetails/:StudentId", async (req, res) => {
+app.get('/getStudentDetails/:StudentId', async (req, res) => {
   try {
-    const { StudentId } = req.params;
+    const {StudentId} = req.params;
     const getStudentDetails = await pool.query(
       `SELECT
         *
@@ -121,9 +256,9 @@ app.get("/getStudentDetails/:StudentId", async (req, res) => {
   }
 });
 //get the specific homework of student
-app.get("/getAllStudentHomeWorks/:HomeWorkId", async (req, res) => {
+app.get('/getAllStudentHomeWorks/:HomeWorkId', async (req, res) => {
   try {
-    const { HomeWorkId } = req.params;
+    const {HomeWorkId} = req.params;
     const getStudentsHomeWorks = await pool.query(
       `SELECT
         "submission".*
@@ -140,9 +275,9 @@ app.get("/getAllStudentHomeWorks/:HomeWorkId", async (req, res) => {
 });
 
 //get the specific homework of student
-app.get("/getStudentHomeWork/:SubmittedId", async (req, res) => {
+app.get('/getStudentHomeWork/:SubmittedId', async (req, res) => {
   try {
-    const { SubmittedId } = req.params;
+    const {SubmittedId} = req.params;
     const getStudentHomeWork = await pool.query(
       `SELECT
         *
@@ -159,9 +294,9 @@ app.get("/getStudentHomeWork/:SubmittedId", async (req, res) => {
 });
 //get course homeworks
 
-app.get("/getCourseHomeWorks/:courseId", async (req, res) => {
+app.get('/getCourseHomeWorks/:courseId', async (req, res) => {
   try {
-    const { courseId } = req.params;
+    const {courseId} = req.params;
     const getCourseHomeWorks = await pool.query(
       `SELECT
     "homework".id, 
@@ -181,9 +316,9 @@ WHERE
 });
 //get the Home that the student submitted and not sumbitted
 
-app.get("/getStudentCourseHomeWorks/:studentId/:courseId", async (req, res) => {
+app.get('/getStudentCourseHomeWorks/:studentId/:courseId', async (req, res) => {
   try {
-    const { studentId, courseId } = req.params;
+    const {studentId, courseId} = req.params;
     const getStudentHomeWorks = await pool.query(
       `SELECT
         "submission".*, 
@@ -207,27 +342,44 @@ app.get("/getStudentCourseHomeWorks/:studentId/:courseId", async (req, res) => {
   }
 });
 // get all courses of user
-app.get("/getUserCourses/:id", async (req, res) => {
+app.get('/getUserCourses/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const getUserCourses = await pool.query(
       `SELECT
-        course.title, 
-        "person"."fname", 
-        "person"."lname", 
-        course."id"
+      person.fname, 
+      person.lname, 
+      person."id", 
+      person."type", 
+      course.title, 
+      course.description,
+      course.id as cid
     FROM
-        "person"
-        INNER JOIN
-        "courseparticipants"
-        ON 
-            "person"."id" = "courseparticipants"."personid"
-        INNER JOIN
-        course
-        ON 
-            "courseparticipants"."courseid" = course."id"
+      course
+      INNER JOIN
+      courseparticipants
+      ON 
+        course."id" = courseparticipants.courseid
+      INNER JOIN
+      person
+      ON 
+        courseparticipants.personid = person."id"
     WHERE
-        "person"."id" =$1`,
+      course."id" IN ((SELECT
+      course."id"
+    FROM
+      courseparticipants
+      INNER JOIN
+      course
+      ON 
+        courseparticipants.courseid = course."id"
+      INNER JOIN
+      person
+      ON 
+        courseparticipants.personid = person."id"
+    WHERE
+      person."id" = $1)) AND
+      person."type" = 'teacher'`,
       [id]
     );
     res.json(getUserCourses.rows);
@@ -236,13 +388,45 @@ app.get("/getUserCourses/:id", async (req, res) => {
   }
 });
 
+// create a submission
+app.post('/submission', async (req, res) => {
+  try {
+    const {studentid, homeworkid} = req.body;
+    const created_at = new Date().toISOString();
+    const updated_at = created_at;
+    const grade = -1;
+    const status = 'Waiting';
+    const graderid = -1;
+    const graderfullname = 'Not available';
+    const id = Math.floor(Math.random() * 2147483646);
+    const addUser = await pool.query(
+      `INSERT INTO "public"."submission" ("id", "studentid", "homeworkid", "grade", "status", "created_at", "updated_at", "graderid", "graderfullname") VALUES ($9, $1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      [
+        studentid,
+        homeworkid,
+        grade,
+        status,
+        created_at,
+        updated_at,
+        graderid,
+        graderfullname,
+        id,
+      ]
+    );
+    //user_id | user_name
+    res.json(addUser.rows[0]);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
 // create a user
-app.post("/users", async (req, res) => {
+app.post('/users', async (req, res) => {
   try {
     console.log(req.body);
-    const { user_id, user_name } = req.body;
+    const {user_id, user_name} = req.body;
     const addUser = await pool.query(
-      "INSERT INTO users (user_id, user_name) VALUES($1, $2) RETURNING *",
+      'INSERT INTO users (user_id, user_name) VALUES($1, $2) RETURNING *',
       [user_id, user_name]
     );
     //user_id | user_name
@@ -253,9 +437,9 @@ app.post("/users", async (req, res) => {
 });
 
 // get all users
-app.get("/users", async (req, res) => {
+app.get('/users', async (req, res) => {
   try {
-    const getAllUsers = await pool.query("SELECT * FROM users;");
+    const getAllUsers = await pool.query('SELECT * FROM users;');
     res.json(getAllUsers.rows);
   } catch (error) {
     console.log(error);
@@ -263,9 +447,9 @@ app.get("/users", async (req, res) => {
 });
 
 // get all users
-app.get("/getteachersfromcourse/:id/:type", async (req, res) => {
+app.get('/getteachersfromcourse/:id/:type', async (req, res) => {
   try {
-    const { id, type } = req.params;
+    const {id, type} = req.params;
     const getTeachers = await pool.query(
       `SELECT
         course.title, 
@@ -294,10 +478,10 @@ app.get("/getteachersfromcourse/:id/:type", async (req, res) => {
   }
 });
 
-app.post("/getteachersfromcourse/:id", async (req, res) => {
+app.post('/getteachersfromcourse/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { type } = req.body;
+    const {id} = req.params;
+    const {type} = req.body;
     const getTeachers = await pool.query(
       `SELECT
         course.title, 
@@ -325,11 +509,11 @@ app.post("/getteachersfromcourse/:id", async (req, res) => {
 });
 
 // get user by id
-app.get("/users/:id", async (req, res) => {
+app.get('/users/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const getUser = await pool.query(
-      "SELECT * FROM users WHERE user_id = $1;",
+      'SELECT * FROM users WHERE user_id = $1;',
       [id]
     );
     res.json(getUser.rows);
@@ -337,41 +521,79 @@ app.get("/users/:id", async (req, res) => {
     console.log(error);
   }
 });
-
-// update user
-app.put("/users/:id", async (req, res) => {
+app.delete('/homework/:id', async (req, res) => {
   try {
-    const { id } = req.params;
-    const { user_name } = req.body;
+    const {id} = req.params;
+    const deleteUser = await pool.query(
+      'DELETE FROM "public"."homework" WHERE "id" = $1;',
+      [id]
+    );
+    res.json('Homework deleted');
+  } catch (error) {
+    console.log(error);
+  }
+});
+app.put('/homework/:id', async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {title, description, deadline} = req.body;
+    const updateCourse = await pool.query(
+      `UPDATE "public"."homework" SET "title" = $2, "description" = $3, "deadline" = $4 WHERE "id" = $1;`,
+      [id, title, description, deadline]
+    );
+    res.json('course updated');
+  } catch (error) {
+    console.log(error);
+  }
+});
+//
+app.put('/course/:id', async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {title, description} = req.body;
+    const updateCourse = await pool.query(
+      `UPDATE "public"."course" SET "title" = $2, "description" = $3 WHERE "id" = $1;`,
+      [id, title, description]
+    );
+    res.json('course updated');
+  } catch (error) {
+    console.log(error);
+  }
+});
+// update user
+app.put('/users/:id', async (req, res) => {
+  try {
+    const {id} = req.params;
+    const {user_name} = req.body;
     const updateUser = await pool.query(
-      "UPDATE users SET user_name = $1 WHERE user_id = $2;",
+      'UPDATE users SET user_name = $1 WHERE user_id = $2;',
       [user_name, id]
     );
-    res.json("User updated");
+    res.json('User updated');
   } catch (error) {
     console.log(error);
   }
 });
 
 // delete a user
-app.delete("/users/:id", async (req, res) => {
+app.delete('/users/:id', async (req, res) => {
   try {
-    const { id } = req.params;
+    const {id} = req.params;
     const deleteUser = await pool.query(
-      "DELETE FROM users WHERE user_id = $1;",
+      'DELETE FROM users WHERE user_id = $1;',
       [id]
     );
-    res.json("User deleted");
+    res.json('User deleted');
   } catch (error) {
     console.log(error);
   }
 });
 
 // get all users
-app.get("/courses", async (req, res) => {
-  const type = "student";
+app.get('/courses', async (req, res) => {
+  const type = 'student';
   try {
-    const getAllUsers = await pool.query(ayman("student"));
+    const getAllUsers = await pool.query(ayman('student'));
     res.json(getAllUsers.rows);
   } catch (error) {
     console.log(error);
@@ -381,16 +603,21 @@ app.get("/courses", async (req, res) => {
 ////////////////////////////////////// files
 
 app.post(
-  "/uploadFile/:homeworkId",
-  upload.single("file"),
+  '/uploadFile/:fkValue/:table/:fk',
+  upload.single('file'),
   async function (req, res, next) {
     try {
       const currDate = new Date().toISOString();
-      const { homeworkId } = req.params;
-      const { path, mimetype, originalname } = req.file;
+      const {fkValue} = req.params;
+      const {path, mimetype, originalname} = req.file;
+      const table = req.params.table;
+      const fk = req.params.fk;
+
+      const id = await newIdFor(table);
+      console.log('id=', id);
       const addFile = await pool.query(
-        "INSERT INTO homework_file (path, homework_id, mimetype, created_at, updated_at, title, id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *",
-        [path, homeworkId, mimetype, currDate, currDate, originalname, uuidv4()]
+        `INSERT INTO ${table} (path, ${fk}, mimetype, created_at, updated_at, title, id) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+        [path, fkValue, mimetype, currDate, currDate, originalname, id]
       );
       res.json(addFile.rows[0]);
     } catch (error) {
@@ -399,27 +626,44 @@ app.post(
   }
 );
 
-app.get("/files/:homeworkId", async (req, res) => {
+// delete a user
+app.delete('/file/:id/:table', async (req, res) => {
   try {
-    const { homeworkId } = req.params;
-    const getFiles = await pool.query(
-      `SELECT homework_file.* FROM homework_file WHERE homework_file.homework_id = $1`,
-      [homeworkId]
+    const {id, table} = req.params;
+    const deletedFile = await pool.query(
+      `DELETE FROM ${table} WHERE id = $1;`,
+      [id]
     );
-    //user_id | user_name
+    res.json('File deleted');
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+app.get('/files/:fk_value/:table/:fk', async (req, res) => {
+  try {
+    const {fk_value} = req.params;
+    const table = req.params.table;
+    const fk = req.params.fk;
+
+    const getFiles = await pool.query(
+      `SELECT ${table}.* FROM ${table} WHERE ${table}.${fk} = $1`,
+      [fk_value]
+    );
     res.json(getFiles.rows);
   } catch (error) {
     console.log(error);
   }
 });
 
-app.get("/download/:id", async (req, res) => {
+app.get('/download/:id/:table', async (req, res) => {
   try {
     const id = req.params.id;
+    const table = req.params.table;
 
     // get file from db
     const getFile = await pool.query(
-      `SELECT homework_file.* FROM homework_file WHERE homework_file."id" = $1`,
+      `SELECT ${table}.* FROM ${table} WHERE ${table}."id" = $1`,
       [id]
     );
     const file = getFile.rows[0];
@@ -428,18 +672,33 @@ app.get("/download/:id", async (req, res) => {
     const file_mimetype = file.mimetype;
 
     res.set({
-      "Content-Type": file_mimetype,
+      'Content-Type': file_mimetype,
     });
 
     const full_path = path.join(__dirname, file_path);
     res.sendFile(full_path);
   } catch (error) {
-    res.status(400).send("Error while downloading file. Try again later.");
+    res.status(400).send('Error while downloading file. Try again later.');
   }
 });
 
+async function newIdFor(table) {
+  try {
+    const getNewId = await pool.query(
+      `SELECT MAX("${table}"."id") FROM "${table}"`
+    );
+    const newId = getNewId.rows[0].max;
+    if (newId == null) {
+      return 0;
+    } else {
+      return newId + 1;
+    }
+  } catch (error) {
+    console.log('error getting id for', table, error);
+  }
+}
 ///////////////// init server
 
 app.listen(5000, () => {
-  console.log("Server has started on port 5000");
+  console.log('Server has started on port 5000');
 });
