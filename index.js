@@ -22,21 +22,8 @@ var upload = multer({storage: storage});
 // middleware
 app.use(cors());
 app.use(express.json());
-// middleware
-// Save Comments
-// app.post('/SaveComment/:MyComment', async (req, res) => {
-//     try {
-//         const {MyComment} = req.params;
-//         const SaveComment = await pool.query("INSERT INTO Comment (user_id, user_name) VALUES($1, $2) RETURNING *",
-//         [user_id, user_name])
-//         //user_id | user_name
-//         res.json(addUser.rows[0]);
-//     } catch (error) {
-//         console.log(error);
-//     }
-// });
-// Add new Comment
 
+// Add new Comment
 app.post('/AddComment', async (req, res) => {
   try {
     const {
@@ -392,22 +379,22 @@ app.get('/getUserCourses/:id', async (req, res) => {
 app.post('/submission', async (req, res) => {
   try {
     const {studentid, homeworkid} = req.body;
-    const created_at = new Date().toISOString();
-    const updated_at = created_at;
+    const createdat = new Date().toISOString();
+    const updatedat = createdat;
     const grade = -1;
     const status = 'Waiting';
     const graderid = -1;
     const graderfullname = 'Not available';
     const id = Math.floor(Math.random() * 2147483646);
     const addUser = await pool.query(
-      `INSERT INTO "public"."submission" ("id", "studentid", "homeworkid", "grade", "status", "created_at", "updated_at", "graderid", "graderfullname") VALUES ($9, $1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+      `INSERT INTO "public"."submission" ("id", "studentid", "homeworkid", "grade", "status", "createdat", "updatedat", "graderid", "graderfullname") VALUES ($9, $1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
       [
         studentid,
         homeworkid,
         grade,
         status,
-        created_at,
-        updated_at,
+        createdat,
+        updatedat,
         graderid,
         graderfullname,
         id,
@@ -435,11 +422,19 @@ app.post('/users', async (req, res) => {
     console.log(error);
   }
 });
-
+// get all users
+app.get('/getAllCourses', async (req, res) => {
+  try {
+    const getAllUsers = await pool.query('SELECT * FROM course;');
+    res.json(getAllUsers.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
 // get all users
 app.get('/users', async (req, res) => {
   try {
-    const getAllUsers = await pool.query('SELECT * FROM users;');
+    const getAllUsers = await pool.query('SELECT * FROM person;');
     res.json(getAllUsers.rows);
   } catch (error) {
     console.log(error);
@@ -521,6 +516,36 @@ app.get('/users/:id', async (req, res) => {
     console.log(error);
   }
 });
+
+
+app.delete('/user/:id', async (req, res) => {
+  try {
+    const {id} = req.params;
+    const deleteUser = await pool.query(
+      'DELETE FROM "public"."person" WHERE "id" = $1;',
+      [id]
+    );
+    res.json('person deleted');
+  } catch (error) {
+    console.log(error);
+  }
+});
+app.delete('/course/:id', async (req, res) => {
+  try {
+    const {id} = req.params;
+    const deleteCourse = await pool.query(
+      'DELETE FROM "public"."course" WHERE "id" = $1;',
+      [id]
+    );
+    res.json('course deleted');
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+
+
+
 app.delete('/homework/:id', async (req, res) => {
   try {
     const {id} = req.params;
