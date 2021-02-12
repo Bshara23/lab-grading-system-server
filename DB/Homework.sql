@@ -1,6 +1,0 @@
-INSERT INTO "homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES (456, 4, 'HomeWork2', 'This is homework2 of Web', '30/10/2020', '20/10/2020', '20/10/2020');
-INSERT INTO "homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES (123, 4, 'HomeWork1', 'This is homework1 of Web', '21/10/2020', '10/10/2020', '10/10/2020');
-INSERT INTO "homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES (789, 4, 'HomeWork3', 'This is homework3 of Web', '20/11/2020', '10/11/2020', '10/11/2020');
-INSERT INTO "homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES (456, 4, 'HomeWork2', 'This is homework2 of Web', '30/10/2020', '20/10/2020', '20/10/2020');
-INSERT INTO "homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES (123, 4, 'HomeWork1', 'This is homework1 of Web', '21/10/2020', '10/10/2020', '10/10/2020');
-INSERT INTO "homework" ("id", "courseid", "title", "description", "deadline", "createdat", "updatedat") VALUES (789, 4, 'HomeWork3', 'This is homework3 of Web', '20/11/2020', '10/11/2020', '10/11/2020');
