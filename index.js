@@ -408,20 +408,21 @@ app.post('/submission', async (req, res) => {
 });
 
 // create a user
-app.post('/users', async (req, res) => {
+app.post('/user', async (req, res) => {
   try {
-    console.log(req.body);
-    const {user_id, user_name} = req.body;
+    const {id, fname, lname, password, type} = req.body;
+    const createdat = new Date().toISOString();
+    const updatedat = createdat;
     const addUser = await pool.query(
-      'INSERT INTO users (user_id, user_name) VALUES($1, $2) RETURNING *',
-      [user_id, user_name]
+      'INSERT INTO person (id, fname, lname, password, type, createdat, updatedat) VALUES($1, $2, $3, $4, $5, $6, $7) RETURNING *',
+      [id, fname, lname, password, type, createdat, updatedat]
     );
-    //user_id | user_name
     res.json(addUser.rows[0]);
   } catch (error) {
     console.log(error);
   }
 });
+
 // get all users
 app.get('/getAllCourses', async (req, res) => {
   try {
@@ -435,6 +436,20 @@ app.get('/getAllCourses', async (req, res) => {
 app.get('/users', async (req, res) => {
   try {
     const getAllUsers = await pool.query('SELECT * FROM person;');
+    res.json(getAllUsers.rows);
+  } catch (error) {
+    console.log(error);
+  }
+});
+
+// get user
+app.get('/user/:id', async (req, res) => {
+  try {
+    const {id} = req.params;
+    const getAllUsers = await pool.query(
+      'SELECT * FROM person WHERE  "person"."id" =$1;',
+      [id]
+    );
     res.json(getAllUsers.rows);
   } catch (error) {
     console.log(error);
@@ -517,7 +532,6 @@ app.get('/users/:id', async (req, res) => {
   }
 });
 
-
 app.delete('/user/:id', async (req, res) => {
   try {
     const {id} = req.params;
@@ -542,9 +556,6 @@ app.delete('/course/:id', async (req, res) => {
     console.log(error);
   }
 });
-
-
-
 
 app.delete('/homework/:id', async (req, res) => {
   try {
