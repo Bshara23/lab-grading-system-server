@@ -5,7 +5,7 @@
 - [Instruction for running the server](#server)
 
 ## Instruction for setting up the database:<a name = "database"></a>
-0.1 Download the latest release of [pgAdmin](https://www.pgadmin.org/download/pgadmin-4-windows/)<br>
+0.1 Download the latest release of [pgAdmin](https://www.pgadmin.org/download/pgadmin-4-windows/).<br>
 1.1 Open pgAdmin, right click on ```Databases```, selected ```Create``` and then ```Database...```.<br>
 
 [![1](instructions/1.jpg)]()
